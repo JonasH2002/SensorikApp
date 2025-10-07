@@ -1,87 +1,58 @@
 package de.hsas.inf.sensorikapp
 
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
-import android.util.Log
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
+import de.hsas.inf.sensorikapp.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), SensorEventListener {
+class MainActivity : AppCompatActivity() {
 
-    private lateinit var sensorManager: SensorManager
-    private var lightSensor: Sensor? = null
-    private var gravitySensor: Sensor? = null
-
-    private lateinit var lightValueText: TextView
-    private lateinit var gravityValueText: TextView
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.appBarMain.toolbar)
+
+        binding.appBarMain.fab.setOnClickListener { view ->
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null)
+                .setAnchorView(R.id.fab).show()
         }
-
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-        gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
-
-        lightValueText = findViewById(R.id.lightValueText)
-        gravityValueText = findViewById(R.id.gravityValueText)
+        val drawerLayout: DrawerLayout = binding.drawerLayout
+        val navView: NavigationView = binding.navView
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.nav_gyroskop, R.id.nav_photometer, R.id.nav_gps
+            ), drawerLayout
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Do something here if sensor accuracy changes.
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.main_activity2, menu)
+        return true
     }
 
-    // Inside MainActivity.kt
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event != null) {
-            // Check the sensor type if you're listening to multiple sensors
-            if (event.sensor.type == Sensor.TYPE_GRAVITY) {
-                if (event.values.size >= 3) { // Accelerometer should have at least 3 values
-                    val xValue = event.values[0]
-                    val yValue = event.values[1] // This is now safe
-                    val zValue = event.values[2]
-                    // Use xValue, yValue, zValue
-
-                    gravityValueText.text = "X: $xValue, Y: $yValue, Z: $zValue"
-                } else {
-                    Log.w(
-                        "SensorApp",
-                        "Accelerometer event.values has unexpected size: ${event.values.size}"
-                    )
-                }
-            } else if (event.sensor.type == Sensor.TYPE_LIGHT) {
-                if (event.values.isNotEmpty()) { // Light sensor should have at least 1 value
-                    val lightValue = event.values[0] // This is safe
-                    // Use lightValue
-                    lightValueText.text = "$lightValue lux"
-                } else {
-                    Log.w("SensorApp", "Light sensor event.values is empty")
-                }
-            }
-            // Add similar checks for other sensor types you are using
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
-        sensorManager.registerListener(this, gravitySensor, SensorManager.SENSOR_DELAY_NORMAL)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sensorManager.unregisterListener(this)
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }

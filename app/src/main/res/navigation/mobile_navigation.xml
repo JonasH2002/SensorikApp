@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_gyroskop">
+
+    <fragment
+        android:id="@+id/nav_gyroskop"
+        android:name="de.hsas.inf.sensorikapp.ui.gyroskop.GyroskopFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_gyroskop" />
+
+    <fragment
+        android:id="@+id/nav_photometer"
+        android:name="de.hsas.inf.sensorikapp.ui.photometer.PhotometerFragment"
+        android:label="@string/menu_photometer"
+        tools:layout="@layout/fragment_photometer" />
+
+    <fragment
+        android:id="@+id/nav_gps"
+        android:name="de.hsas.inf.sensorikapp.ui.position.GPSFragment"
+        android:label="@string/menu_gps"
+        tools:layout="@layout/fragment_gps" />
+</navigation>
