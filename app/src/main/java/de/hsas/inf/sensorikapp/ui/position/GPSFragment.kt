@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
-import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -21,7 +21,11 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import de.hsas.inf.sensorikapp.Const
 import de.hsas.inf.sensorikapp.databinding.FragmentGpsBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class GPSFragment : Fragment() {
 
@@ -31,15 +35,12 @@ class GPSFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private lateinit var chart: AAChartView
-
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private val locationData = mutableListOf<Any>()
+    private lateinit var aaChartModel: AAChartModel
 
-    private lateinit var categories: Array<String>
-    private lateinit var elements: Array<AASeriesElement>
-
-    private val requestPermissionLauncher =
+    private val requestPermissionLauncher = 
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -56,22 +57,28 @@ class GPSFragment : Fragment() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
-                    // Update UI with location data
-                    // ...
-                    categories = arrayOf<String>().plus(location.longitude.toString())
 
-                    elements = arrayOf<AASeriesElement>().plus(AASeriesElement().name("Latitude").data(arrayOf(location.latitude)))
+                    binding.progressBar.visibility = View.GONE
+                    binding.locationText.visibility = View.VISIBLE
+                    binding.locationTimeText.visibility = View.VISIBLE
 
-                    val aaChartModel: AAChartModel = AAChartModel()
-                        .chartType(AAChartType.Line)
-                        .title("title")
-                        .subtitle("subtitle")
-                        .backgroundColor("#a379e8")
-                        .categories(categories)
-                        .dataLabelsEnabled(true)
-                        .series(arrayOf(elements))
+                    binding.locationText.text = "Latitude: ${location.latitude}, Longitude: ${location.longitude}"
+                    val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
+                    val date = Date(location.time)
+                    val formattedDate = sdf.format(date)
+                    binding.locationTimeText.text = "Last Location Timestamp: $formattedDate"
 
-                    chart.aa_refreshChartWithChartModel(aaChartModel)
+                    if (locationData.size > 50) {
+                        locationData.removeAt(0)
+                    }
+                    locationData.add(arrayOf(location.longitude, location.latitude))
+
+                    val series = arrayOf(
+                        AASeriesElement()
+                            .name("Location")
+                            .data(locationData.toTypedArray())
+                    )
+                    binding.aaChartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(series)
                 }
             }
         }
@@ -88,26 +95,46 @@ class GPSFragment : Fragment() {
         _binding = FragmentGpsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        chart = binding.chart
-
-        categories = arrayOf("0")
-
-        elements = arrayOf(AASeriesElement()
-            .name("GPS")
-            .data(arrayOf(0)))
-
-        val aaChartModel: AAChartModel = AAChartModel()
-            .chartType(AAChartType.Line)
-            .title("title")
-            .subtitle("subtitle")
-            .backgroundColor("#a379e8")
-            .categories(categories)
-            .dataLabelsEnabled(true)
-            .series(arrayOf(elements))
-
-        chart.aa_drawChartWithChartModel(aaChartModel)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        binding.progressBar.visibility = View.VISIBLE
+        binding.locationText.visibility = View.GONE
+        binding.locationTimeText.visibility = View.GONE
+
+        aaChartModel = AAChartModel()
+            .chartType(AAChartType.Scatter)
+            .title("GPS Location")
+            .subtitle("Latitude and Longitude")
+            .dataLabelsEnabled(false)
+            .series(arrayOf(
+                AASeriesElement()
+                    .name("Location")
+                    .data(arrayOf())
+            ))
+
+        binding.aaChartView.aa_drawChartWithChartModel(aaChartModel)
+
+
+        binding.toggleButton.check(binding.textView.id)
+        binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    binding.textView.id -> {
+                        // Handle selection of first button
+                        binding.aaChartView.visibility = View.GONE
+                        binding.locationText.visibility = View.VISIBLE
+                        binding.locationTimeText.visibility = View.VISIBLE
+                    }
+
+                    binding.chartView.id -> {
+                        // Handle selection of second button
+                        binding.aaChartView.visibility = View.VISIBLE
+                        binding.locationText.visibility = View.GONE
+                        binding.locationTimeText.visibility = View.GONE
+                    }
+                }
+            }
+        }
 
         return root
     }
@@ -147,6 +174,7 @@ class GPSFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        Log.d(Const.TAG, "Location updates stopped")
         stopLocationUpdates()
     }
 

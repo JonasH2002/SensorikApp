@@ -11,10 +11,10 @@
         <item
             android:id="@+id/nav_photometer"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_gps" />
+            android:title="@string/menu_photometer" />
         <item
             android:id="@+id/nav_gps"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_photometer" />
+            android:title="@string/menu_gps" />
     </group>
 </menu>
