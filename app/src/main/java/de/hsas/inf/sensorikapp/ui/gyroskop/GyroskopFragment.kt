@@ -67,13 +67,11 @@ class GyroskopFragment : Fragment(), SensorEventListener {
             if (isChecked) {
                 when (checkedId) {
                     binding.textView.id -> {
-                        // Handle selection of first button
                         binding.aaChartView.visibility = View.GONE
                         binding.gyroskopValueTextView.visibility = View.VISIBLE
                     }
 
                     binding.chartView.id -> {
-                        // Handle selection of second button
                         binding.aaChartView.visibility = View.VISIBLE
                         binding.gyroskopValueTextView.visibility = View.GONE
                     }

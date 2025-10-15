@@ -58,10 +58,6 @@ class GPSFragment : Fragment() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
 
-                    binding.progressBar.visibility = View.GONE
-                    binding.locationText.visibility = View.VISIBLE
-                    binding.locationTimeText.visibility = View.VISIBLE
-
                     binding.locationText.text = "Latitude: ${location.latitude}, Longitude: ${location.longitude}"
                     val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
                     val date = Date(location.time)
@@ -97,10 +93,6 @@ class GPSFragment : Fragment() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        binding.progressBar.visibility = View.VISIBLE
-        binding.locationText.visibility = View.GONE
-        binding.locationTimeText.visibility = View.GONE
-
         aaChartModel = AAChartModel()
             .chartType(AAChartType.Scatter)
             .title("GPS Location")
@@ -120,14 +112,12 @@ class GPSFragment : Fragment() {
             if (isChecked) {
                 when (checkedId) {
                     binding.textView.id -> {
-                        // Handle selection of first button
                         binding.aaChartView.visibility = View.GONE
                         binding.locationText.visibility = View.VISIBLE
                         binding.locationTimeText.visibility = View.VISIBLE
                     }
 
                     binding.chartView.id -> {
-                        // Handle selection of second button
                         binding.aaChartView.visibility = View.VISIBLE
                         binding.locationText.visibility = View.GONE
                         binding.locationTimeText.visibility = View.GONE

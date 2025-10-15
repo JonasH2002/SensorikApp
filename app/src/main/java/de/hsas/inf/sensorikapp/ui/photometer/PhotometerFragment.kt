@@ -80,13 +80,11 @@ class PhotometerFragment : Fragment(), SensorEventListener {
             if (isChecked) {
                 when (checkedId) {
                     binding.textView.id -> {
-                        // Handle selection of first button
                         binding.aaChartView.visibility = View.GONE
                         binding.lightValueText.visibility = View.VISIBLE
                     }
 
                     binding.chartView.id -> {
-                        // Handle selection of second button
                         binding.aaChartView.visibility = View.VISIBLE
                         binding.lightValueText.visibility = View.GONE
                     }
