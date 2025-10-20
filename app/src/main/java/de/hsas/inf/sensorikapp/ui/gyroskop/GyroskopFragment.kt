@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
@@ -38,9 +37,6 @@ class GyroskopFragment : Fragment(), SensorEventListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val gyroskopViewModel =
-            ViewModelProvider(this).get(GyroskopViewModel::class.java)
-
         _binding = FragmentGyroskopBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
@@ -40,7 +39,7 @@ class GPSFragment : Fragment() {
     private val locationData = mutableListOf<Any>()
     private lateinit var aaChartModel: AAChartModel
 
-    private val requestPermissionLauncher = 
+    private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
@@ -85,9 +84,6 @@ class GPSFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val GPSViewModel =
-            ViewModelProvider(this).get(GPSViewModel::class.java)
-
         _binding = FragmentGpsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

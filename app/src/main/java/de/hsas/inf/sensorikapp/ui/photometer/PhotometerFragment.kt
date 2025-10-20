@@ -23,7 +23,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
@@ -53,9 +52,6 @@ class PhotometerFragment : Fragment(), SensorEventListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val photometerViewModel =
-            ViewModelProvider(this).get(PhotometerViewModel::class.java)
-
         _binding = FragmentPhotometerBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
