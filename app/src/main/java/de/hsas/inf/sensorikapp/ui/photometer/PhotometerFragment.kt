@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -16,9 +17,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
@@ -41,8 +44,9 @@ class PhotometerFragment : Fragment(), SensorEventListener {
     private val lightData = mutableListOf<Any>()
     private lateinit var aaChartModel: AAChartModel
 
-    private val LIGHT_THRESHOLD = 120.0f
+    private var lightThreshold = 120.0f
     private val NOTIFICATION_CHANNEL_ID = "light_sensor_channel"
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,6 +61,11 @@ class PhotometerFragment : Fragment(), SensorEventListener {
 
         lightValueText = binding.lightValueText
 
+        sharedPreferences = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        lightThreshold = sharedPreferences.getFloat("light_threshold", 120.0f)
+        binding.thresholdEditText.setText(lightThreshold.toString())
+
+
         sensorManager = requireActivity().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
@@ -67,11 +76,13 @@ class PhotometerFragment : Fragment(), SensorEventListener {
             .title("Light Sensor Data")
             .subtitle("lux")
             .dataLabelsEnabled(false)
-            .series(arrayOf(
-                AASeriesElement()
-                    .name("Light")
-                    .data(arrayOf())
-            ))
+            .series(
+                arrayOf(
+                    AASeriesElement()
+                        .name("Light")
+                        .data(arrayOf())
+                )
+            )
 
         binding.aaChartView.aa_drawChartWithChartModel(aaChartModel)
 
@@ -82,13 +93,32 @@ class PhotometerFragment : Fragment(), SensorEventListener {
                     binding.textView.id -> {
                         binding.aaChartView.visibility = View.GONE
                         binding.lightValueText.visibility = View.VISIBLE
+                        binding.thresholdInputLayout.visibility = View.VISIBLE
+                        binding.saveButton.visibility = View.VISIBLE
                     }
 
                     binding.chartView.id -> {
                         binding.aaChartView.visibility = View.VISIBLE
                         binding.lightValueText.visibility = View.GONE
+                        binding.thresholdInputLayout.visibility = View.GONE
+                        binding.saveButton.visibility = View.GONE
                     }
                 }
+            }
+        }
+
+        binding.saveButton.setOnClickListener {
+            val newThreshold = binding.thresholdEditText.text.toString().toFloatOrNull()
+            if (newThreshold != null) {
+                lightThreshold = newThreshold
+                sharedPreferences.edit {
+                    putFloat("light_threshold", lightThreshold)
+                }
+
+                Toast.makeText(requireContext(), "Threshold saved", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                Toast.makeText(requireContext(), "Invalid threshold", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -119,7 +149,7 @@ class PhotometerFragment : Fragment(), SensorEventListener {
                     binding.aaChartView.aa_onlyRefreshTheChartDataWithChartOptionsSeriesArray(series)
 
 
-                    if (lightValue > LIGHT_THRESHOLD) {
+                    if (lightValue > lightThreshold) {
                         sendNotification(lightValue)
                     }
                 } else {
@@ -153,7 +183,7 @@ class PhotometerFragment : Fragment(), SensorEventListener {
         with(NotificationManagerCompat.from(requireContext())) {
             // notificationId is a unique int for each notification that you must define
             if (ActivityCompat.checkSelfPermission(
-                    requireActivity(),
+                    requireContext(),
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -162,7 +192,6 @@ class PhotometerFragment : Fragment(), SensorEventListener {
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                     1
                 )
-
                 return
             }
             notify(1, builder.build())

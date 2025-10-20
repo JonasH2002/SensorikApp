@@ -131,6 +131,7 @@ class GPSFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.d(Const.TAG, "Location updates started")
         startLocationUpdates()
     }
 
