@@ -72,6 +72,8 @@ class PhotometerFragment : Fragment(), SensorEventListener {
             .title("Light Sensor Data")
             .subtitle("lux")
             .dataLabelsEnabled(false)
+            .yAxisTitle("lux")
+            .legendEnabled(true)
             .series(
                 arrayOf(
                     AASeriesElement()

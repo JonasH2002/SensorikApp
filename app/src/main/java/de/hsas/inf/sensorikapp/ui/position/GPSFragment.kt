@@ -94,6 +94,8 @@ class GPSFragment : Fragment() {
             .title("GPS Location")
             .subtitle("Latitude and Longitude")
             .dataLabelsEnabled(false)
+            .yAxisTitle("Latitude")
+            .legendEnabled(true)
             .series(arrayOf(
                 AASeriesElement()
                     .name("Location")

@@ -50,6 +50,8 @@ class GyroskopFragment : Fragment(), SensorEventListener {
             .title("Gyroscope Data")
             .subtitle("X, Y, and Z axes")
             .dataLabelsEnabled(false)
+            .yAxisTitle("rad/s")
+            .legendEnabled(true)
             .series(arrayOf(
                 AASeriesElement().name("X").data(arrayOf()),
                 AASeriesElement().name("Y").data(arrayOf()),
